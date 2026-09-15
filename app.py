@@ -14,7 +14,7 @@ TIER_RANK = {"Elite Membership": 2, "Ordinary Member": 1, "Associate Member": 0}
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/hospitals_raw.csv")
+    df = pd.read_csv("hospitals_raw.csv")
     df["category"] = df["specialist"].apply(normalize_specialist)
 
     # One row per hospital, with all its specialties/categories collected into lists.
