@@ -19,8 +19,8 @@ import pandas as pd
 import streamlit as st
 
 APP_DIR = Path(__file__).parent
-HOSPITAL_ATTR_PATH = APP_DIR / "data" / "attractions_near_hospitals.csv"
-RURAL_ATTR_PATH = APP_DIR / "data" / "attractions_rural_regions.csv"
+HOSPITAL_ATTR_PATH = APP_DIR / "attractions_near_hospitals.csv"
+RURAL_ATTR_PATH = APP_DIR / "attractions_rural_regions.csv"
 
 # Low-exertion / short-visit categories, reasonable to recommend to someone
 # recovering from major surgery and staying close to the hospital. This is
