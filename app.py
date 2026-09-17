@@ -24,12 +24,12 @@ with col1:
     )
     st.page_link("pages/1_Hospital_Recommendation.py", label="Go to Hospital Recommendation", icon="🏥")
 with col2:
-    st.subheader("pages/2. Recovery Plan")
+    st.subheader("2. Recovery Plan")
     st.write(
         "Plan where to recover: close to the hospital for major surgery, "
         "or somewhere rural and scenic for minor procedures or mental-health/wellness care."
     )
-    st.page_link("2_Recovery_Plan.py", label="Go to Recovery Plan", icon="🌿")
+    st.page_link("pages/2_Recovery_Plan.py", label="Go to Recovery Plan", icon="🌿")
 
 st.markdown("---")
 st.caption(
