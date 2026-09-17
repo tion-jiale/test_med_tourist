@@ -8,7 +8,7 @@ from specialist_mapping import normalize_specialist
 # Resolved from this file's own location (not the caller's), so it works
 # correctly whether imported from app.py or from pages/*.py.
 APP_DIR = Path(__file__).parent
-DATA_PATH = APP_DIR / "data" / "hospitals_raw.csv"
+DATA_PATH = APP_DIR / "hospitals_raw.csv"
 
 ACCRED_RANK = {"JCI Accredited": 3, "MSQH Accredited": 2, "RTAC Accredited": 1}
 TIER_RANK = {"Elite Membership": 2, "Ordinary Member": 1, "Associate Member": 0}
