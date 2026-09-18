@@ -12,8 +12,8 @@ hosp_df = load_hospitals()
 st.title("🌿 Recovery Plan")
 st.caption(
     "Major surgery usually means staying close to the hospital for follow-up visits. "
-    "Minor procedures or mental-health/wellness care leave more room to recover "
-    "somewhere quieter and more scenic."
+    "Minor procedures or mental-health/wellness care leave more room to choose — "
+    "stay in the city, or go somewhere quieter and more scenic."
 )
 
 # ---------------------------------------------------------------------------
@@ -83,15 +83,10 @@ intensity = st.radio(
 )
 
 # ---------------------------------------------------------------------------
-# Step 3: recommendation
+# Helpers: urban (near-hospital) and rural (candidate region) recommendations
 # ---------------------------------------------------------------------------
 
-st.markdown("### Step 3 — Where to recover")
-
-if intensity == "major":
-    # -------------------------------------------------------------
-    # Major surgery: attractions actually near this hospital
-    # -------------------------------------------------------------
+def show_urban_recommendations(anchor, anchor_hospital_name):
     nearby = attractions.attractions_for_hospital(anchor_hospital_name)
 
     if nearby.empty:
@@ -100,50 +95,49 @@ if intensity == "major":
             "No attraction data is available for this specific hospital yet "
             f"(only {len(attractions.hospitals_with_attraction_data())} of the 91 hospitals "
             "have nearby-attraction data so far) — for now, treat this as a reminder to "
-            "book accommodation near the hospital rather than travelling far, and confirm "
-            "timing with the hospital's follow-up schedule.",
+            "book accommodation near the hospital, and confirm timing with the hospital's "
+            "follow-up schedule if you have one.",
             icon="🏙️",
         )
         st.map(
             pd.DataFrame({"lat": [anchor["Latitude"]], "lon": [anchor["Longitude"]]}),
             latitude="lat", longitude="lon", zoom=10,
         )
-    else:
-        st.success(
-            f"**Stay close to {anchor['Hospital_Name']} in {anchor['State']}.** "
-            "Here are easy, low-exertion things nearby to pass the time between follow-ups "
-            f"— all within {nearby['distance_km'].max():.0f}km of the hospital.",
-            icon="🏙️",
-        )
-        available_cats = sorted(nearby["category"].unique())
-        default_cats = [c for c in attractions.URBAN_DEFAULT_CATEGORIES if c in available_cats]
-        cat_filter = st.multiselect(
-            "Filter by type", available_cats, default=default_cats or available_cats[:5]
-        )
-        shown = nearby[nearby["category"].isin(cat_filter)].sort_values("distance_km") if cat_filter else nearby.sort_values("distance_km")
-        shown = shown.head(15)
+        return
 
-        st.caption(f"Showing {len(shown)} of {len(nearby)} attractions within range, sorted by distance.")
-        for _, row in shown.iterrows():
-            st.write(f"**{row['attraction_name']}** — {row['category']} · {row['distance_km']:.1f}km away")
-        if not shown.empty:
-            st.map(shown, latitude="lat", longitude="lon", size=20)
+    st.success(
+        f"**Staying near {anchor['Hospital_Name']} in {anchor['State']}.** "
+        "Here are things nearby to pass the time "
+        f"— all within {nearby['distance_km'].max():.0f}km of the hospital.",
+        icon="🏙️",
+    )
+    available_cats = sorted(nearby["category"].unique())
+    default_cats = [c for c in attractions.URBAN_DEFAULT_CATEGORIES if c in available_cats]
+    cat_filter = st.multiselect(
+        "Filter by type", available_cats, default=default_cats or available_cats[:5], key="urban_cat_filter"
+    )
+    shown = nearby[nearby["category"].isin(cat_filter)].sort_values("distance_km") if cat_filter else nearby.sort_values("distance_km")
+    shown = shown.head(15)
+
+    st.caption(f"Showing {len(shown)} of {len(nearby)} attractions within range, sorted by distance.")
+    for _, row in shown.iterrows():
+        st.write(f"**{row['attraction_name']}** — {row['category']} · {row['distance_km']:.1f}km away")
+    if not shown.empty:
+        st.map(shown, latitude="lat", longitude="lon", size=20)
 
     st.caption(
         "Attraction data sourced from OpenStreetMap (`attractions_near_hospitals.csv`) — "
         "real listed places, not curated or verified for accessibility/suitability."
     )
 
-else:
-    # -------------------------------------------------------------
-    # Minor / mental health: candidate rural regions from the project
-    # -------------------------------------------------------------
+
+def show_rural_recommendations(anchor):
     ranked_regions = attractions.rural_regions_ranked_by_distance(
         anchor["Latitude"], anchor["Longitude"]
     )
 
     st.success(
-        "**You have more freedom to recover somewhere quieter.** "
+        "**Recovering somewhere quieter.** "
         "Pick one of the project's candidate rural regions below — ranked by straight-line "
         f"distance from {anchor['Hospital_Name']}:",
         icon="🌿",
@@ -156,7 +150,7 @@ else:
     region_codes = ranked_regions["reference_point"].tolist()
 
     chosen_idx = st.selectbox(
-        "Rural region", range(len(region_codes)), format_func=lambda i: region_labels[i]
+        "Rural region", range(len(region_codes)), format_func=lambda i: region_labels[i], key="rural_region_select"
     )
     chosen_region = region_codes[chosen_idx]
 
@@ -164,7 +158,7 @@ else:
     available_cats = sorted(region_attractions["category"].unique())
     default_cats = [c for c in attractions.RURAL_DEFAULT_CATEGORIES if c in available_cats]
     cat_filter = st.multiselect(
-        "Filter by type", available_cats, default=default_cats or available_cats[:5]
+        "Filter by type", available_cats, default=default_cats or available_cats[:5], key="rural_cat_filter"
     )
     shown = region_attractions[region_attractions["category"].isin(cat_filter)].sort_values("distance_km") if cat_filter else region_attractions.sort_values("distance_km")
     shown = shown.head(15)
@@ -181,3 +175,33 @@ else:
         "OpenStreetMap (`attractions_rural_regions.csv`) — distance is straight-line from "
         "the hospital to each region's centroid, not driving distance or travel time."
     )
+
+
+# ---------------------------------------------------------------------------
+# Step 3: recommendation
+# ---------------------------------------------------------------------------
+
+st.markdown("### Step 3 — Where to recover")
+
+if intensity == "major":
+    st.caption(
+        "Because this is major surgery, we're only showing options close to the hospital "
+        "for easier follow-up — rural options aren't offered for this treatment type."
+    )
+    show_urban_recommendations(anchor, anchor_hospital_name)
+
+else:
+    location_choice = st.radio(
+        "Where would you like to recover?",
+        options=["urban", "rural"],
+        format_func=lambda k: {
+            "urban": "Stay in the city — near the hospital",
+            "rural": "Go rural — quieter, scenic candidate region",
+        }[k],
+        horizontal=True,
+    )
+
+    if location_choice == "urban":
+        show_urban_recommendations(anchor, anchor_hospital_name)
+    else:
+        show_rural_recommendations(anchor)
