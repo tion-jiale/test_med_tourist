@@ -5,11 +5,9 @@ from shared import load_hospitals
 from specialty_severity import default_intensity
 import attractions
 from shared import render_sidebar
-...
-st.set_page_config(...)   # must stay the first Streamlit call
-render_sidebar()
 
 st.set_page_config(page_title="Recovery Plan", layout="wide", page_icon="🌿")
+render_sidebar()
 
 hosp_df = load_hospitals()
 
