@@ -1,6 +1,10 @@
 import streamlit as st
 
 from shared import load_hospitals
+from shared import render_sidebar
+...
+st.set_page_config(...)   # must stay the first Streamlit call
+render_sidebar()
 
 st.set_page_config(
     page_title="MediMatch",
