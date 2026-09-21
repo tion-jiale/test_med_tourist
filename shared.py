@@ -22,24 +22,24 @@ def render_sidebar():
     )
 
     with st.sidebar:
+        col1, col2 = st.columns(2)
 
-    col1, col2 = st.columns(2)
+        with col1:
+            st.image("assets/sdg8 logo.png", width=100)
 
-    with col1:
-        st.image("assets/sdg8 logo.png", width=100)
+        with col2:
+            st.image("assets/sdg 9 logo.png", width=100)
 
-    with col2:
-        st.image("assets/sdg 9 logo.png", width=100)
+        st.divider()
 
-    st.divider()
+        st.caption(f"Group: {GROUP_NAME}")
 
-    st.caption(f"Group: {GROUP_NAME}")
-
-    st.markdown("**About this project**")
-    st.markdown(
-        "A feasibility study on using medical tourism to drive rural economic "
-        "development in Malaysia. See the Introduction page for details."
-    )
+        st.markdown("**About this project**")
+        st.markdown(
+            "A feasibility study on using medical tourism to drive rural economic "
+            "development in Malaysia. See the Introduction page for details."
+        )
+        
 # Resolved from this file's own location (not the caller's), so it works
 # correctly whether imported from app.py or from pages/*.py.
 APP_DIR = Path(__file__).parent
