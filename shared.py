@@ -100,7 +100,7 @@ def plot_hospitals_map(hosp_df, height=450, zoom=9):
     df["specialties_str"] = df["categories"].apply(
         lambda c: ", ".join(c[:4]) + (", …" if len(c) > 4 else "")
     )
-    fig = px.scatter_map(
+    fig = px.scatter_mapbox(
         df, lat="Latitude", lon="Longitude",
         hover_name="Hospital_Name",
         hover_data={
@@ -117,7 +117,7 @@ def plot_hospitals_map(hosp_df, height=450, zoom=9):
         height=height,
     )
     fig.update_traces(marker=dict(size=14))
-    fig.update_layout(map_style=MAP_STYLE, margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    fig.update_layout(mapbox_style=MAP_STYLE, margin={"r": 0, "t": 0, "l": 0, "b": 0})
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -153,7 +153,7 @@ def plot_hospital_and_attractions_map(hospital_row, attractions_df, height=450, 
     else:
         combined = hosp_point
 
-    fig = px.scatter_map(
+    fig = px.scatter_mapbox(
         combined, lat="lat", lon="lon",
         color="type",
         color_discrete_map={"Hospital": "#D62728", "Attraction": "#007B8A"},
@@ -164,7 +164,7 @@ def plot_hospital_and_attractions_map(hospital_row, attractions_df, height=450, 
         height=height,
     )
     fig.update_layout(
-        map_style=MAP_STYLE,
+        mapbox_style=MAP_STYLE,
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(255,255,255,0.7)"),
     )
