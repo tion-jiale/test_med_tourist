@@ -72,7 +72,7 @@ def rank_score(row):
     )
 
 
-def styled_box(text, icon="", bg="#0e4c5c", color="lightgray"):
+def styled_box(text, icon="", bg="#007B8A", color="#F0F2F6"):
     """Replacement for st.info/st.success/st.warning with a fixed, readable
     text color instead of Streamlit's theme-dependent default. Supports
     **bold** markdown (converted to <strong> manually, since markdown syntax
