@@ -11,10 +11,8 @@ ALL_STATES = sorted(hosp_df["State"].dropna().unique())
 
 st.title("🏥 Hospital Recommendation")
 st.caption(
-    f"Built from {len(hosp_df)} hospitals in the uploaded dataset. "
-    f"{hosp_df['has_specialty_listed'].sum()} of them have a specialty listed — "
-    f"the other {(~hosp_df['has_specialty_listed']).sum()} have no specialty tag in the source "
-    "data and won't appear in specialty-based results below."
+    f"Built from {len(hosp_df)} hospitals in the uploaded dataset, across "
+    f"{len(ALL_CATEGORIES)} specialty categories."
 )
 
 # ---------------------------------------------------------------------------
@@ -108,10 +106,10 @@ else:
 with st.expander("About this data"):
     st.write(
         "Hospital names, states, coordinates, accreditation, membership tier, and specialty "
-        "listings come directly from the uploaded dataset (`malaysia_hospitals_with_coords.csv`). "
-        "Specialty labels were consolidated from the raw values in that file "
-        "(e.g. 'ENT (Ear Nose Throat)' and 'Ear, Nose & Throat (ENT)' were merged into one "
-        "'ENT' category) — see `specialist_mapping.py` for the exact mapping. Nothing about "
-        "accreditation, membership tier, or specialties was invented or supplemented from outside "
-        "the file."
+        "listings come directly from the uploaded dataset "
+        "(`malaysia_hospitals_specialist_cleaned.csv`). Specialty labels were consolidated from "
+        f"{len(hosp_df)} hospitals' raw specialist strings using a rule-based keyword classifier "
+        "(see `specialist_mapping.py`) — e.g. 'Cardiac and Vascular Surgery' and 'Cardilogy & "
+        "Cardithoracic Surgery' both map to the same category. Nothing about accreditation, "
+        "membership tier, or specialties was invented or supplemented from outside the file."
     )
