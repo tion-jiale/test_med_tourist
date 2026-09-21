@@ -12,7 +12,7 @@ hosp_df = load_hospitals()
 
 st.title("🏥 MediMatch")
 st.markdown(
-    "This app has two parts — use the sidebar, or the links below, to get started."
+    "by Code Red DOSM Datathon 2026."
 )
 
 col1, col2 = st.columns(2)
