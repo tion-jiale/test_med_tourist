@@ -25,7 +25,12 @@ specialty = st.selectbox(
 )
 
 if specialty is None:
-    st.info("Pick a specialty above to see matching hospitals.")
+        st.markdown(
+        "<div style='background-color:#0e4c5c; padding:0.75rem 1rem; "
+        "border-radius:0.5rem; color:lightgray;'>"
+        "Pick a specialty above to see matching hospitals.</div>",
+        unsafe_allow_html=True,
+    )
     st.stop()
 
 # ---------------------------------------------------------------------------
