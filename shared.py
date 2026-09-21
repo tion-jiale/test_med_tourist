@@ -29,10 +29,6 @@ def render_sidebar():
             "A feasibility study on using medical tourism to drive rural economic "
             "development in Malaysia. See the Introduction page for details."
         )
-        st.caption(
-            "Hospital data is real (91 hospitals). Specialty groupings, treatment "
-            "intensity and rural destinations are curated or heuristic."
-        )
 
 # Resolved from this file's own location (not the caller's), so it works
 # correctly whether imported from app.py or from pages/*.py.
