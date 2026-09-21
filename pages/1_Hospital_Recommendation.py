@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from shared import load_hospitals, rank_score, styled_box
+from shared import load_hospitals, rank_score, styled_box, plot_hospitals_map
 
 st.set_page_config(page_title="Hospital Recommendation", layout="wide", page_icon="🏥")
 
@@ -95,13 +95,11 @@ else:
                     st.session_state["recovery_specialty"] = specialty
                     st.switch_page("pages/2_Recovery_Plan.py")
             with col_b:
-                st.map(
-                    pd.DataFrame({"lat": [row["Latitude"]], "lon": [row["Longitude"]]}),
-                    latitude="lat", longitude="lon", size=30, zoom=9,
-                )
+                plot_hospitals_map(results[results["Hospital_Name"] == row["Hospital_Name"]], height=180, zoom=10)
 
     st.markdown("### All matching hospitals on one map")
-    st.map(results, latitude="Latitude", longitude="Longitude", size=20)
+    st.caption("Hover any point for hospital details.")
+    plot_hospitals_map(results)
 
 with st.expander("About this data"):
     st.write(
