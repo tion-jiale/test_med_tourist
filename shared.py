@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import pandas as pd
 import streamlit as st
@@ -68,4 +69,18 @@ def rank_score(row):
     return (
         accreditation_rank(row["Accreditation"]),
         TIER_RANK.get(row["Membership_Tier"], 0),
+    )
+
+
+def styled_box(text, icon="", bg="#0e4c5c", color="lightgray"):
+    """Replacement for st.info/st.success/st.warning with a fixed, readable
+    text color instead of Streamlit's theme-dependent default. Supports
+    **bold** markdown (converted to <strong> manually, since markdown syntax
+    inside a raw HTML div isn't reliably parsed by st.markdown)."""
+    html_text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    prefix = f"{icon} " if icon else ""
+    st.markdown(
+        f"<div style='background-color:{bg}; padding:0.75rem 1rem; "
+        f"border-radius:0.5rem; color:{color};'>{prefix}{html_text}</div>",
+        unsafe_allow_html=True,
     )
