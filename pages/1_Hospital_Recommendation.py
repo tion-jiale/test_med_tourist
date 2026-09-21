@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from shared import load_hospitals, rank_score
+from shared import load_hospitals, rank_score, styled_box
 
 st.set_page_config(page_title="Hospital Recommendation", layout="wide", page_icon="🏥")
 
@@ -25,13 +25,7 @@ specialty = st.selectbox(
 )
 
 if specialty is None:
-    st.markdown(
-        "<div style='background-color:#0e4c5c; padding:0.75rem 1rem; "
-        "border-radius:0.5rem; color:lightgray;'>"
-        "Pick a specialty above to see matching hospitals.</div>",
-        unsafe_allow_html=True,
-    )
-   
+    styled_box("Pick a specialty above to see matching hospitals.")
     st.stop()
 
 # ---------------------------------------------------------------------------
@@ -70,7 +64,7 @@ st.caption(
 )
 
 if results.empty:
-    st.warning("No hospitals match this specialty with the current filters. Try loosening the filters.")
+    styled_box("No hospitals match this specialty with the current filters. Try loosening the filters.")
 else:
     st.markdown(f"**{len(results)} hospital(s) found for {specialty}**")
 
