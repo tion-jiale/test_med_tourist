@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from shared import load_hospitals
+from shared import load_hospitals, styled_box
 from specialty_severity import default_intensity
 import attractions
 
@@ -33,7 +33,7 @@ default_idx = (
 )
 
 if carried_hospital:
-    st.info(
+    styled_box(
         f"Carried over from Hospital Recommendation: **{carried_hospital}** "
         f"({carried_specialty}). Change it below if you'd like.",
         icon="↩️",
@@ -44,12 +44,7 @@ anchor_hospital_name = st.selectbox(
 )
 
 if anchor_hospital_name is None:
-    st.markdown(
-        "<div style='background-color:#0e4c5c; padding:0.75rem 1rem; "
-        "border-radius:0.5rem; color:lightgray;'>"
-        "Pick a hospital above to plan your recovery stay.</div>",
-        unsafe_allow_html=True,
-    )
+    styled_box("Pick a hospital above to plan your recovery stay.")
     st.stop()
 
 anchor = hosp_df[hosp_df["Hospital_Name"] == anchor_hospital_name].iloc[0]
@@ -95,7 +90,7 @@ def show_urban_recommendations(anchor, anchor_hospital_name):
     nearby = attractions.attractions_for_hospital(anchor_hospital_name)
 
     if nearby.empty:
-        st.info(
+        styled_box(
             f"**Stay close to {anchor['Hospital_Name']} in {anchor['State']}.** "
             "No attraction data is available for this specific hospital yet "
             f"(only {len(attractions.hospitals_with_attraction_data())} of the 91 hospitals "
@@ -110,7 +105,7 @@ def show_urban_recommendations(anchor, anchor_hospital_name):
         )
         return
 
-    st.success(
+    styled_box(
         f"**Staying near {anchor['Hospital_Name']} in {anchor['State']}.** "
         "Here are things nearby to pass the time "
         f"— all within {nearby['distance_km'].max():.0f}km of the hospital.",
@@ -141,7 +136,7 @@ def show_rural_recommendations(anchor):
         anchor["Latitude"], anchor["Longitude"]
     )
 
-    st.success(
+    styled_box(
         "**Recovering somewhere quieter.** "
         "Pick one of the project's candidate rural regions below — ranked by straight-line "
         f"distance from {anchor['Hospital_Name']}:",
