@@ -11,24 +11,25 @@ from specialist_mapping import normalize_specialist
 PROJECT_TITLE = "Matching Care, Measuring Growth: AI-Powered Recommendation for Malaysia’s Medical Tourism"   # <- fill in
 GROUP_NAME = "CODE RED"         # <- fill in
 
-def render_sidebar():
-    # Title above the page navigation (CSS pseudo-element on the nav container)
-    st.markdown(
-        "<style>[data-testid='stSidebarNav']::before {"
-        f"content: '{PROJECT_TITLE}';"
-        "display: block; font-size: 1.2rem; font-weight: 700;"
-        "line-height: 1.3; padding: 1.25rem 1rem 0.5rem;}</style>",
-        unsafe_allow_html=True,
-    )
+with st.sidebar:
 
-    with st.sidebar:
-        st.divider()
-        st.caption(f"Group: {GROUP_NAME}")
-        st.markdown("**About this project**")
-        st.markdown(
-            "A feasibility study on using medical tourism to drive rural economic "
-            "development in Malaysia. See the Introduction page for details."
-        )
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.image("assets/sdg8 logo.png", width=100)
+
+    with col2:
+        st.image("assets/sdg 9 logo.png", width=100)
+
+    st.divider()
+
+    st.caption(f"Group: {GROUP_NAME}")
+
+    st.markdown("**About this project**")
+    st.markdown(
+        "A feasibility study on using medical tourism to drive rural economic "
+        "development in Malaysia. See the Introduction page for details."
+    )
 
 # Resolved from this file's own location (not the caller's), so it works
 # correctly whether imported from app.py or from pages/*.py.
