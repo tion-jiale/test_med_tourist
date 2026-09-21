@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from shared import load_hospitals, styled_box
+from shared import load_hospitals, styled_box, plot_hospital_and_attractions_map
 from specialty_severity import default_intensity
 import attractions
 
@@ -99,10 +99,7 @@ def show_urban_recommendations(anchor, anchor_hospital_name):
             "follow-up schedule if you have one.",
             icon="🏙️",
         )
-        st.map(
-            pd.DataFrame({"lat": [anchor["Latitude"]], "lon": [anchor["Longitude"]]}),
-            latitude="lat", longitude="lon", zoom=10,
-        )
+        plot_hospital_and_attractions_map(anchor, None, height=350)
         return
 
     styled_box(
@@ -123,7 +120,7 @@ def show_urban_recommendations(anchor, anchor_hospital_name):
     for _, row in shown.iterrows():
         st.write(f"**{row['attraction_name']}** — {row['category']} · {row['distance_km']:.1f}km away")
     if not shown.empty:
-        st.map(shown, latitude="lat", longitude="lon", size=20)
+        plot_hospital_and_attractions_map(anchor, shown)
 
     st.caption(
         "Attraction data sourced from OpenStreetMap (`attractions_near_hospitals.csv`) — "
@@ -167,7 +164,7 @@ def show_rural_recommendations(anchor):
     for _, row in shown.iterrows():
         st.write(f"**{row['attraction_name']}** — {row['category']} · {row['distance_km']:.1f}km from reference point")
     if not shown.empty:
-        st.map(shown, latitude="lat", longitude="lon", size=20)
+        plot_hospital_and_attractions_map(anchor, shown)
 
     st.caption(
         "Rural regions are the project's actual candidate sites (Sabah, Sarawak, Kelantan, "
