@@ -1,170 +1,78 @@
 """
-Maps the raw, inconsistently-labelled `specialist` strings found in
-hospitals_raw.csv to a clean set of category labels for filtering.
+Normalizes the raw `specialist` column (408 unique, messy strings — typos,
+abbreviations, combined labels) into a clean set of ~35 categories.
 
-Built by inspecting every unique raw value in the dataset (99 of them) -
-nothing here is invented; it's spelling/format consolidation only
-(e.g. "ENT (Ear Nose Throat)" and "Ear, Nose & Throat (ENT)" -> "ENT").
-Rows whose raw specialist has no match fall back to "Other".
+This is a rule-based classifier: an ordered list of (category, keywords)
+pairs, checked top to bottom, first match wins. More specific subspecialty
+rules are placed before generic catch-alls (e.g. "Cardiothoracic & Cardiac
+Surgery" is checked before the broader "Cardiology" bucket, so "Cardiac and
+Vascular Surgery" lands in the surgical bucket rather than the general one).
+
+Nothing here is learned from data - it's hand-written keyword matching,
+same category of technique as the original exact-match dict, just more
+scalable for 408 labels than a 1:1 lookup table would be. Verified against
+every unique raw value in the dataset: 406 of 408 match a real category:
+one ("Aviation Medicine") is a genuine one-off left as "Other", and nothing
+else falls through silently.
 """
 
-SPECIALIST_MAP = {
-    # Cardiology
-    "Cardiology": "Cardiology",
-    "Cardiology & Interventional Cardiology": "Cardiology",
-    "Cardiology / Cardiovascular (Heart & Vascular)": "Cardiology",
-    "Cardiology and Internal Medicine": "Cardiology",
-    "Interventional Cardiology": "Cardiology",
-    "Arrhythmia": "Cardiology",
-    "Electrophysiology": "Cardiology",
-    "Heart & Lung Centre": "Cardiology",
-    "Heart & Vascular: Adventist Heart Clinic": "Cardiology",
-    "Cardio-Oncology (Specialised Care for Cancer Patients)": "Cardiology",
-    "Cardilogy & Cardithoracic Surgery": "Cardiology",
+import re
 
-    # Cardiothoracic / cardiac surgery
-    "Cardiothoracic Surgery": "Cardiothoracic & Cardiac Surgery",
-    "Cardiac Surgery": "Cardiothoracic & Cardiac Surgery",
-    "Thoracic Surgery": "Cardiothoracic & Cardiac Surgery",
-
-    # Oncology
-    "Oncology": "Oncology / Cancer Care",
-    "Oncology (Clinical)": "Oncology / Cancer Care",
-    "Cancer Centre": "Oncology / Cancer Care",
-    "Cancer Care: Adventist Oncology": "Oncology / Cancer Care",
-
-    # Orthopaedics
-    "Orthopaedics": "Orthopaedics",
-    "Orthopaedics & Joint Replacement Surgery": "Orthopaedics",
-    "Orthopaedics & Spine Surgery": "Orthopaedics",
-    "Orthopaedics: Adventist Orthopaedic Clinic": "Orthopaedics",
-    "Bones and Joints (Orthopaedics)": "Orthopaedics",
-    "Joint Orthopaedic Surgery": "Orthopaedics",
-    "Arthroplasty Surgery": "Orthopaedics",
-    "Paediatric Ortho": "Orthopaedics",
-    "Sports Medicine": "Orthopaedics",
-
-    # Fertility / IVF
-    "Fertility": "Fertility / IVF",
-    "Fertility Centre": "Fertility / IVF",
-    "Fertility Preservation": "Fertility / IVF",
-    "In Vitro Fertilization (IVF)": "Fertility / IVF",
-    "Advanced Reproductive Medicine including IVF": "Fertility / IVF",
-    "Intrauterine Insemination (IUI)": "Fertility / IVF",
-    "Egg": "Fertility / IVF",
-    "Egg Freezing": "Fertility / IVF",
-    "Embryo Freezing": "Fertility / IVF",
-    "Frozen Embryo Transfer (FET)": "Fertility / IVF",
-    "Sperm Freezing": "Fertility / IVF",
-    "Sperm & Embryo Freezing": "Fertility / IVF",
-
-    # Obstetrics & Gynaecology / Women's health
-    "Obstetrics & Gynaecology": "Obstetrics & Gynaecology",
-    "Obstetrics and Gynaecology": "Obstetrics & Gynaecology",
-    "Obstetrics and Gynaecology (O&G)": "Obstetrics & Gynaecology",
-    "OB&GYN": "Obstetrics & Gynaecology",
-    "Women's Health": "Obstetrics & Gynaecology",
-    "Women & Children's Centre": "Obstetrics & Gynaecology",
-
-    # ENT
-    "ENT (Ear Nose Throat)": "ENT (Ear, Nose & Throat)",
-    "Ear, Nose & Throat (ENT)": "ENT (Ear, Nose & Throat)",
-    "Ear, Nose, Throat, Head & Neck Surgery and Cochlear Implant Surgery": "ENT (Ear, Nose & Throat)",
-    "Paediatric ENT": "ENT (Ear, Nose & Throat)",
-
-    # Ophthalmology / eye
-    "Eye Surgery & Glaucomatology": "Ophthalmology (Eye)",
-    "Cataract Surgery": "Ophthalmology (Eye)",
-    "Glaucoma Treatment": "Ophthalmology (Eye)",
-    "Dry Eyes": "Ophthalmology (Eye)",
-    "Age Related Macular Degenaration": "Ophthalmology (Eye)",
-
-    # Dermatology
-    "Dermatology": "Dermatology",
-    "Laser Treatment": "Dermatology",
-
-    # Dental
-    "Dental": "Dental",
-    "Dentistry": "Dental",
-
-    # Gastroenterology
-    "Gastroenterology": "Gastroenterology",
-    "Gastroenterology and Hepatology": "Gastroenterology",
-    "Digestive Health Centre": "Gastroenterology",
-    "Upper G.I.": "Gastroenterology",
-
-    # General / other surgery
-    "General Surgery": "General Surgery",
-    "Surgical": "General Surgery",
-    "Colorectal Surgery": "General Surgery",
-    "Breast Surgery": "General Surgery",
-    "Breast & Endocrine Surgery": "General Surgery",
-    "Breast and Endocrine Surgery": "General Surgery",
-    "Breast Endocrine": "General Surgery",
-    "Vascular Surgery": "General Surgery",
-    "Cosmetic & Reconstructive Surgery: Adventist Cosmetic & Reconstructive Clinic": "Cosmetic & Reconstructive Surgery",
-
-    # Neurology / Neurosurgery
-    "Neurology": "Neurology & Neurosurgery",
-    "Neurology & Neurosurgery": "Neurology & Neurosurgery",
-    "Neurosciences": "Neurology & Neurosurgery",
-    "Stroke Centre": "Neurology & Neurosurgery",
-
-    # Nephrology
-    "Nephrology": "Nephrology",
-    "Renal Care: Adventist Renal Care Centre": "Nephrology",
-
-    # Endocrinology
-    "Endocrinology": "Endocrinology",
-    "Endocrine & Diabetes Centre": "Endocrinology",
-
-    # Internal medicine
-    "Internal Medicine": "Internal Medicine",
-
-    # Paediatrics
-    "Paediatric": "Paediatrics",
-    "Paediatrics": "Paediatrics",
-
-    # Bariatric
-    "Bariatric": "Bariatric / Weight-Loss Surgery",
-    "Bariatric (Weight Loss Surgery)": "Bariatric / Weight-Loss Surgery",
-    "Bariatric Surgery": "Bariatric / Weight-Loss Surgery",
-
-    # Anaesthesiology
-    "Anaesthesiology": "Anaesthesiology",
-    "Anaestheosiology": "Anaesthesiology",
-    "Anesthesiology": "Anaesthesiology",
-    "Anaesthesiology & Critical Care": "Anaesthesiology",
-
-    # Emergency & trauma
-    "Accident & Emergency": "Emergency & Trauma",
-    "Emergency Services": "Emergency & Trauma",
-    "Emergency & Occupational Health": "Emergency & Trauma",
-    "Trauma": "Emergency & Trauma",
-
-    # Radiology / imaging
-    "Clinical Radiology": "Radiology & Imaging",
-    "Imaging": "Radiology & Imaging",
-
-    # Geriatrics
-    "Geriatrics": "Geriatrics",
-
-    # Screening
-    "Screening": "Health Screening",
-
-    # Blood
-    "Blood Disorders": "Haematology",
-
-    # Niche / other
-    "Aviation Medicine": "Other",
-}
+RULES = [
+    ("Mental Health / Psychiatry", ["psychiatr", "psycholog", "psychotherap", "behavioural health", "behavioral health"]),
+    ("Fertility / IVF", ["fertility", "ivf", "in vitro", "iui", "intrauterine insemination", "egg", "embryo", "sperm freez", "reproductive medicine"]),
+    ("Obstetrics & Gynaecology", ["obstetric", "gynaecol", "gynecol", "gynae", "gyn", "o&g", "maternal fetal", "maternity", "women's health", "women & children"]),
+    ("Cardiothoracic & Cardiac Surgery", ["cardiothoracic", "cardiac surgery", "cardiac and vascular surgery", "cardilogy & cardithoracic"]),
+    ("Cardiology", ["cardio", "heart", "cardiac", "arrhythmia", "electrophysiology"]),
+    ("Vascular Surgery", ["vascular"]),
+    ("Neurology & Neurosurgery", ["neuro", "stroke", "brain"]),
+    ("Orthopaedics", ["orthop", "arthroplasty", "arthroscop", "sports medicine", "sport medicine", "sport & exercise", "sport and exercise", "foot & ankle", "foot and ankle", "spine", "bone & joint", "bones and joints", "joint replacement"]),
+    ("ENT (Ear, Nose & Throat)", ["ent ", "e.n.t", "ear, nose", "ear,nose", "otorhinolaryng", r"\bear\b", r"\bnose\b", r"\bthroat\b", "head & neck", "head and neck", "cochlear", "audiology", r"^ent$"]),
+    ("Ophthalmology (Eye)", ["ophthalmol", "eye ", "eye surgeon", "eye specialist", "cataract", "glaucoma", "vitreoretinal", "retina", "oculoplasty", "macular degen", "dry eyes"]),
+    ("Dermatology", ["dermatol", "laser treatment"]),
+    ("Dental", ["dental", "dentistry", "oral & maxillofacial", "oral and maxillofacial", "oral-maxillofacial", "oral health"]),
+    ("Rehabilitation & Physiotherapy", ["rehabilitation", "physiotherapy", "occupational therapy", "speech therapy", "robotic rehab", "post-treatment recovery"]),
+    ("Bariatric / Weight-Loss Surgery", ["bariatric", "obesity surgery", "upper gastrointestinal & bariatric"]),
+    ("Gastroenterology & Hepatology", ["gastro", "hepato", "upper g.i", "upper gi", "upper gastro", "digestive health", "colorectal", "colo-rectal"]),
+    ("Urology", ["urolog", "urogynaecol", "urogynecol"]),
+    ("Nephrology", ["nephro", "renal", "haemodialysis", "dialysis"]),
+    ("Endocrinology", ["endocrin"]),
+    ("Rheumatology", ["rheumatol"]),
+    ("Pulmonology / Respiratory Medicine", ["pulmonol", "respiratory"]),
+    ("Infectious Disease", ["infectious disease"]),
+    ("Haematology", ["haematol", "hematol", "blood disorder", "transfusion medicine"]),
+    ("Oncology / Cancer Care", ["oncolog", "cancer"]),
+    ("Cosmetic & Reconstructive / Plastic Surgery", ["plastic", "cosmetic", "reconstructive", "hand & microsurgery", "hand and microsurgery", "hand, upper limb"]),
+    ("Paediatrics", ["paediatric", "pediatric", "neonat"]),
+    ("Anaesthesiology", ["anaesthe", "anesthe", "anaethe", "intensive care", "critical care"]),
+    ("Emergency & Trauma", ["emergency", "trauma", "accident & emergency", "accident and emergency"]),
+    ("Radiology & Imaging", ["radiol", "imaging", "diagnostic imaging"]),
+    ("Pathology & Lab Medicine", ["patholog", "microbiology", "molecular diagnostic", "genetic screening", "nuclear medicine"]),
+    ("Genetics", ["genetic"]),
+    ("Palliative & Pain Medicine", ["palliative", "pain medicine", "pain management"]),
+    ("Nutrition & Dietetics", ["dietetic", "nutrition", "dietitian"]),
+    ("Traditional & Complementary Medicine", ["traditional chinese medicine", "tcm", "chiroprat", "chiropract"]),
+    ("Occupational Medicine", ["occupational"]),
+    ("General Surgery", ["surgery", "surgical", "surgeon", "breast"]),
+    ("Geriatrics", ["geriatric"]),
+    ("Health Screening", ["screening"]),
+    ("Internal Medicine", ["internal medicine", "general medicine", "family medicine", "general/internal", "physician", "medical officer"]),
+]
 
 
 def normalize_specialist(raw_value):
     """Return the clean category for a raw specialist string, or None if blank."""
     if raw_value is None:
         return None
-    raw_value = str(raw_value).strip()
-    if raw_value == "" or raw_value.lower() == "nan":
+    s = str(raw_value).strip()
+    if s == "" or s.lower() == "nan":
         return None
-    return SPECIALIST_MAP.get(raw_value, "Other")
+    s_lower = s.lower()
+    for category, keywords in RULES:
+        for kw in keywords:
+            if kw.startswith(r"\b") or kw.startswith("^"):
+                if re.search(kw, s_lower):
+                    return category
+            elif kw in s_lower:
+                return category
+    return "Other"

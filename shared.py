@@ -10,8 +10,23 @@ from specialist_mapping import normalize_specialist
 APP_DIR = Path(__file__).parent
 DATA_PATH = APP_DIR / "hospitals_raw.csv"
 
-ACCRED_RANK = {"JCI Accredited": 3, "MSQH Accredited": 2, "RTAC Accredited": 1}
 TIER_RANK = {"Elite Membership": 2, "Ordinary Member": 1, "Associate Member": 0}
+
+
+def accreditation_rank(value):
+    """Accreditation values in this dataset are messy and sometimes combined
+    (e.g. "JCI, MSQH", "MSQH, QTAC", "RTAC" with no "Accredited" suffix), so
+    rank by presence of each accreditation body rather than exact match."""
+    if pd.isna(value):
+        return 0
+    v = str(value).lower()
+    if "jci" in v:
+        return 3
+    if "msqh" in v:
+        return 2
+    if "rtac" in v or "qtac" in v:
+        return 1
+    return 0
 
 # WP Kuala Lumpur/Putrajaya sits inside Selangor geographically, so for
 # recovery-destination matching purposes treat it as Selangor.
@@ -51,6 +66,6 @@ def rank_score(row):
     Not a validated scoring model - just orders results so accredited /
     Elite-tier hospitals surface first."""
     return (
-        ACCRED_RANK.get(row["Accreditation"], 0),
+        accreditation_rank(row["Accreditation"]),
         TIER_RANK.get(row["Membership_Tier"], 0),
     )
