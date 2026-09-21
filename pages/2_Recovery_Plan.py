@@ -44,7 +44,12 @@ anchor_hospital_name = st.selectbox(
 )
 
 if anchor_hospital_name is None:
-    st.info("Pick a hospital above to plan your recovery stay.")
+    st.markdown(
+        "<div style='background-color:#0e4c5c; padding:0.75rem 1rem; "
+        "border-radius:0.5rem; color:lightgray;'>"
+        "Pick a hospital above to plan your recovery stay.</div>",
+        unsafe_allow_html=True,
+    )
     st.stop()
 
 anchor = hosp_df[hosp_df["Hospital_Name"] == anchor_hospital_name].iloc[0]
