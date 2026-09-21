@@ -3,7 +3,13 @@ import pandas as pd
 
 from shared import load_hospitals, rank_score
 
+from shared import render_sidebar
+...
+st.set_page_config(...)   # must stay the first Streamlit call
+render_sidebar()
+
 st.set_page_config(page_title="Hospital Recommendation", layout="wide", page_icon="🏥")
+
 
 hosp_df = load_hospitals()
 ALL_CATEGORIES = sorted({c for cats in hosp_df["categories"] for c in cats})
