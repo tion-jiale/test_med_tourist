@@ -3,7 +3,7 @@ import streamlit as st
 from shared import load_hospitals
 
 st.set_page_config(
-    page_title="Malaysia Medical Tourism",
+    page_title="MediMatch",
     layout="wide",
     page_icon="🏥",
 )
