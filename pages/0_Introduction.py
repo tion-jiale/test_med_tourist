@@ -7,7 +7,7 @@ st.set_page_config(page_title="Introduction", page_icon="📖", layout="wide")
 render_sidebar()
 
 # ---- Fill these in ----------------------------------------------------------
-TEAM_MEMBERS = ["Shaza Nurayuni binti Shamsul Anuar", "Tion Jia Le", "Yip Yoong Eng", "Ain Mardhiah binti Abdul Hamid]
+TEAM_MEMBERS = ["Shaza Nurayuni binti Shamsul Anuar", "Tion Jia Le", "Yip Yoong Eng", "Ain Mardhiah binti Abdul Hamid"]
 # -----------------------------------------------------------------------------
 
 st.title(PROJECT_TITLE)
@@ -16,10 +16,17 @@ st.caption(f"Group: {GROUP_NAME}")
 st.header("Background")
 st.markdown(
     """
-Malaysia is a leading destination for health travel, and Indonesia is by far the
-largest source market (roughly 70-80% of health tourists). Most of this activity
-is concentrated around a few urban hospital hubs, while many rural regions see
-little of the economic benefit.
+Malaysia has become one of Southeast Asia's fastest-growing medical tourism hubs, drawing patients with low-cost, 
+high-quality care and English-speaking doctors, and welcoming nearly 38 million foreign visitors in 2024, up 31.1% from 2023. 
+The industry took shape after the 1998 formation of the National Committee for the Promotion of Health Tourism, which 
+brought together government and private hospital bodies, and it received dedicated budget support from the Eighth Malaysia Plan onward, 
+along with facilitation measures such as immigration Green Lanes. Foreign patient numbers rose from 75,210 in 2001 to 296,687 in 2006, 
+generating RM203 million in revenue, and later growth was supported by international accreditation (such as JCI) and investment in specialized centers for cardiology, oncology, fertility, and orthopedics. 
+However, this growth has been concentrated in a few well-known hospitals and hubs, while equally capable hospitals elsewhere struggle to attract medical tourists. 
+Patients tend to choose based on informal recommendations and reputation rather than objective assessments of capability, which creates a cycle where already visible hospitals stay dominant. 
+With tax policy and cost structures also becoming more complex, the document concludes that Malaysia lacks a centralized, 
+data-driven mechanism for identifying and communicating hospital-level treatment capabilities across states, 
+which limits efficient matching between patients and suitable hospitals.
 """
 )
 
