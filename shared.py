@@ -12,17 +12,22 @@ PROJECT_TITLE = "Matching Care, Measuring Growth: AI-Powered Recommendation for 
 GROUP_NAME = "CODE RED"         # <- fill in
 
 def render_sidebar():
+    # Title above the page navigation (CSS pseudo-element on the nav container)
+    st.markdown(
+        "<style>[data-testid='stSidebarNav']::before {"
+        f"content: '{PROJECT_TITLE}';"
+        "display: block; font-size: 1.2rem; font-weight: 700;"
+        "line-height: 1.3; padding: 1.25rem 1rem 0.5rem;}</style>",
+        unsafe_allow_html=True,
+    )
+
     with st.sidebar:
         st.divider()
-        st.markdown(f"### {PROJECT_TITLE}")
         st.caption(f"Group: {GROUP_NAME}")
-
         st.markdown("**About this project**")
         st.markdown(
             "A feasibility study on using medical tourism to drive rural economic "
-            "development in Malaysia. Page 1 ranks hospitals by specialty and state "
-            "using rule-based scoring. Page 2 turns a chosen hospital and treatment "
-            "into a recovery plan with suitable rural destinations."
+            "development in Malaysia. See the Introduction page for details."
         )
         st.caption(
             "Hospital data is real (91 hospitals). Specialty groupings, treatment "
