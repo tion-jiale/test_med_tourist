@@ -84,3 +84,85 @@ def styled_box(text, icon="", bg="#007B8A", color="#F0F2F6"):
         f"border-radius:0.5rem; color:{color};'>{prefix}{html_text}</div>",
         unsafe_allow_html=True,
     )
+
+MAP_STYLE = "carto-positron"  # clean light basemap, independent of the app's own theme
+
+
+def plot_hospitals_map(hosp_df, height=450, zoom=9):
+    """Map of hospitals with hover details (name, state, accreditation,
+    tier, top specialties) - replaces st.map's plain dots with a light-theme
+    map the user can hover to read details, instead of guessing from a dot."""
+    if hosp_df.empty:
+        return
+    df = hosp_df.copy()
+    df["specialties_str"] = df["categories"].apply(
+        lambda c: ", ".join(c[:4]) + (", …" if len(c) > 4 else "")
+    )
+    fig = px.scatter_map(
+        df, lat="Latitude", lon="Longitude",
+        hover_name="Hospital_Name",
+        hover_data={
+            "State": True,
+            "Accreditation": True,
+            "Membership_Tier": True,
+            "specialties_str": True,
+            "Latitude": False,
+            "Longitude": False,
+        },
+        labels={"specialties_str": "Specialties"},
+        color_discrete_sequence=["#007B8A"],
+        zoom=zoom,
+        height=height,
+    )
+    fig.update_traces(marker=dict(size=14))
+    fig.update_layout(map_style=MAP_STYLE, margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    st.plotly_chart(fig, use_container_width=True)
+
+def plot_hospital_and_attractions_map(hospital_row, attractions_df, height=450, zoom=10):
+    """Combined map: the hospital (larger, red marker) plus a set of
+    attraction points (teal markers), each hoverable for details. Used on
+    the Recovery Plan page so the hospital's location and the recommended
+    spots are visible together, not as two separate maps."""
+    accred = hospital_row.get("Accreditation")
+    hosp_detail = hospital_row["State"]
+    if pd.notna(accred):
+        hosp_detail += f" · {accred}"
+
+    hosp_point = pd.DataFrame([{
+        "name": hospital_row["Hospital_Name"],
+        "lat": hospital_row["Latitude"],
+        "lon": hospital_row["Longitude"],
+        "type": "Hospital",
+        "detail": hosp_detail,
+        "size": 20,
+    }])
+
+    if attractions_df is not None and not attractions_df.empty:
+        attr_points = pd.DataFrame({
+            "name": attractions_df["attraction_name"],
+            "lat": attractions_df["lat"],
+            "lon": attractions_df["lon"],
+            "type": "Attraction",
+            "detail": attractions_df["category"] + " · " + attractions_df["distance_km"].round(1).astype(str) + "km",
+            "size": 11,
+        })
+        combined = pd.concat([hosp_point, attr_points], ignore_index=True)
+    else:
+        combined = hosp_point
+
+    fig = px.scatter_map(
+        combined, lat="lat", lon="lon",
+        color="type",
+        color_discrete_map={"Hospital": "#D62728", "Attraction": "#007B8A"},
+        size="size", size_max=20,
+        hover_name="name",
+        hover_data={"detail": True, "type": True, "lat": False, "lon": False, "size": False},
+        zoom=zoom,
+        height=height,
+    )
+    fig.update_layout(
+        map_style=MAP_STYLE,
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(255,255,255,0.7)"),
+    )
+    st.plotly_chart(fig, use_container_width=True)
