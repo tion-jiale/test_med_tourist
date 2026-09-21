@@ -4,6 +4,7 @@ import re
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import plotly.graph_objects as go
 
 from specialist_mapping import normalize_specialist
 
@@ -125,47 +126,51 @@ def plot_hospital_and_attractions_map(hospital_row, attractions_df, height=450, 
     """Combined map: the hospital (larger, red marker) plus a set of
     attraction points (teal markers), each hoverable for details. Used on
     the Recovery Plan page so the hospital's location and the recommended
-    spots are visible together, not as two separate maps."""
+    spots are visible together, not as two separate maps.
+
+    Built as a single go.Scattermapbox trace (not px with color=, which
+    splits into multiple traces sharing one mapbox subplot - that combination
+    was found to break tile rendering in this Streamlit/Plotly setup even
+    though plot_hospitals_map's single-trace approach renders fine)."""
     accred = hospital_row.get("Accreditation")
     hosp_detail = hospital_row["State"]
     if pd.notna(accred):
         hosp_detail += f" · {accred}"
 
-    hosp_point = pd.DataFrame([{
-        "name": hospital_row["Hospital_Name"],
-        "lat": hospital_row["Latitude"],
-        "lon": hospital_row["Longitude"],
-        "type": "Hospital",
-        "detail": hosp_detail,
-        "size": 20,
-    }])
+    names = [hospital_row["Hospital_Name"]]
+    lats = [hospital_row["Latitude"]]
+    lons = [hospital_row["Longitude"]]
+    colors = ["#D62728"]
+    sizes = [20]
+    details = [f"Hospital · {hosp_detail}"]
 
     if attractions_df is not None and not attractions_df.empty:
-        attr_points = pd.DataFrame({
-            "name": attractions_df["attraction_name"],
-            "lat": attractions_df["lat"],
-            "lon": attractions_df["lon"],
-            "type": "Attraction",
-            "detail": attractions_df["category"] + " · " + attractions_df["distance_km"].round(1).astype(str) + "km",
-            "size": 11,
-        })
-        combined = pd.concat([hosp_point, attr_points], ignore_index=True)
-    else:
-        combined = hosp_point
+        names += attractions_df["attraction_name"].tolist()
+        lats += attractions_df["lat"].tolist()
+        lons += attractions_df["lon"].tolist()
+        colors += ["#007B8A"] * len(attractions_df)
+        sizes += [11] * len(attractions_df)
+        details += [
+            f"Attraction · {cat} · {dist:.1f}km"
+            for cat, dist in zip(attractions_df["category"], attractions_df["distance_km"])
+        ]
 
-    fig = px.scatter_mapbox(
-        combined, lat="lat", lon="lon",
-        color="type",
-        color_discrete_map={"Hospital": "#D62728", "Attraction": "#007B8A"},
-        size="size", size_max=20,
-        hover_name="name",
-        hover_data={"detail": True, "type": True, "lat": False, "lon": False, "size": False},
-        zoom=zoom,
-        height=height,
-    )
+    fig = go.Figure(go.Scattermapbox(
+        lat=lats, lon=lons,
+        mode="markers",
+        marker=dict(size=sizes, color=colors),
+        text=names,
+        customdata=details,
+        hovertemplate="<b>%{text}</b><br>%{customdata}<extra></extra>",
+    ))
     fig.update_layout(
         mapbox_style=MAP_STYLE,
+        mapbox=dict(
+            center=dict(lat=hospital_row["Latitude"], lon=hospital_row["Longitude"]),
+            zoom=zoom,
+        ),
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(255,255,255,0.7)"),
+        height=height,
+        showlegend=False,
     )
     st.plotly_chart(fig, use_container_width=True)
