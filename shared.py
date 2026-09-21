@@ -26,10 +26,10 @@ def render_sidebar():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.image("assets/sdg8.png", width=100)
+        st.image("assets/sdg8 logo.png", width=100)
 
     with col2:
-        st.image("assets/sdg9.png", width=100)
+        st.image("assets/sdg 9 logo.png", width=100)
 
     st.divider()
 
