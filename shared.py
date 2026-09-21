@@ -8,6 +8,27 @@ import plotly.graph_objects as go
 
 from specialist_mapping import normalize_specialist
 
+PROJECT_TITLE = "Matching Care, Measuring Growth: AI-Powered Recommendation for Malaysia’s Medical Tourism"   # <- fill in
+GROUP_NAME = "CODE RED"         # <- fill in
+
+def render_sidebar():
+    with st.sidebar:
+        st.divider()
+        st.markdown(f"### {PROJECT_TITLE}")
+        st.caption(f"Group: {GROUP_NAME}")
+
+        st.markdown("**About this project**")
+        st.markdown(
+            "A feasibility study on using medical tourism to drive rural economic "
+            "development in Malaysia. Page 1 ranks hospitals by specialty and state "
+            "using rule-based scoring. Page 2 turns a chosen hospital and treatment "
+            "into a recovery plan with suitable rural destinations."
+        )
+        st.caption(
+            "Hospital data is real (91 hospitals). Specialty groupings, treatment "
+            "intensity and rural destinations are curated or heuristic."
+        )
+
 # Resolved from this file's own location (not the caller's), so it works
 # correctly whether imported from app.py or from pages/*.py.
 APP_DIR = Path(__file__).parent
