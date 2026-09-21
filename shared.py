@@ -2,8 +2,8 @@ from pathlib import Path
 import re
 
 import pandas as pd
-import streamlit as st
 import plotly.express as px
+import streamlit as st
 
 from specialist_mapping import normalize_specialist
 
@@ -86,6 +86,7 @@ def styled_box(text, icon="", bg="#007B8A", color="#F0F2F6"):
         unsafe_allow_html=True,
     )
 
+
 MAP_STYLE = "carto-positron"  # clean light basemap, independent of the app's own theme
 
 
@@ -118,6 +119,7 @@ def plot_hospitals_map(hosp_df, height=450, zoom=9):
     fig.update_traces(marker=dict(size=14))
     fig.update_layout(map_style=MAP_STYLE, margin={"r": 0, "t": 0, "l": 0, "b": 0})
     st.plotly_chart(fig, use_container_width=True)
+
 
 def plot_hospital_and_attractions_map(hospital_row, attractions_df, height=450, zoom=10):
     """Combined map: the hospital (larger, red marker) plus a set of
