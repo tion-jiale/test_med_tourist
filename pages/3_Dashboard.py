@@ -4,13 +4,13 @@ import streamlit.components.v1 as components
 from shared import styled_box
 
 st.set_page_config(
-    page_title="Dashboard",
+    page_title="Tourist Analysis Dashboard",
     layout="wide",
     page_icon="📊"
 )
 
-st.title("📊 Dashboard")
-st.caption("LATEST CODE RED DASHBOARD")
+st.title("📊 Tourist Analysis Dashboard")
+st.caption("CODE RED DASHBOARD")
 
 POWER_BI_EMBED_URL = (
     "https://app.powerbi.com/reportEmbed"
