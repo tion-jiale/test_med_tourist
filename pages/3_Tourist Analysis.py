@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 st.title("Tourist Analysis Dashboard")
-st.caption("CODE RED DASHBOARD")
+st.caption("created by CODE RED")
 
 POWER_BI_EMBED_URL = (
     "https://app.powerbi.com/reportEmbed"
