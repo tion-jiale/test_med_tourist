@@ -13,7 +13,7 @@ st.title("Tourist Analysis Dashboard")
 st.caption("created by CODE RED")
 
 POWER_BI_EMBED_URL = (
-    "https://app.powerbi.com/view?r=eyJrIjoiYTZlYjczNTAtNDc0MC00NTY3LWJkNzgtYjkxN2YxYWNkNWJjIiwidCI6IjdmMDQ4ZmMxLTJlYTMtNDhlNC1hYzkyLTkxZDFlYjA5ODA3YyIsImMiOjEwfQ%3D%3D"
+    "https://app.powerbi.com/view?r=eyJrIjoiOTE5YmNhNzEtN2JlMS00ZjZhLWEyY2UtODhlMjhjN2QwZjNiIiwidCI6IjdmMDQ4ZmMxLTJlYTMtNDhlNC1hYzkyLTkxZDFlYjA5ODA3YyIsImMiOjEwfQ%3D%3D"
 )
 
 components.iframe(
