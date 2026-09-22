@@ -18,6 +18,6 @@ POWER_BI_EMBED_URL = (
 
 components.iframe(
     POWER_BI_EMBED_URL,
-    height=800,
+    height=650,
     scrolling=False
 )
