@@ -9,7 +9,7 @@ st.set_page_config(
     page_icon="📊"
 )
 
-st.title("📊 Tourist Analysis Dashboard")
+st.title("Tourist Analysis Dashboard")
 st.caption("CODE RED DASHBOARD")
 
 POWER_BI_EMBED_URL = (
